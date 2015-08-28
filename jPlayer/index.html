@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>jPlayer | The Briefing &mdash; Segment Testing | AlbertMohler.com</title>
+    <style>
+        .toggler::before{content:'Play';}
+        .toggler.playing::before{content:'Playing';}
+        .toggler.paused::before{content:'Paused';}
+        .stopper{margin-left:5px;}
+        .section{display:block;background-color:white;padding:15px;margin:5px 10px;}
+        .section.playing{background-color:goldenrod;}
+    </style>
+</head>
+<body>
+    <a class="briefing" href="http://4ff414ae5107de3a9e18-43dbab4d73aa8c295e652f2d85e793bd.r77.cf1.rackcdn.com/media/audio/totl/Podcast/20150826_TheBriefing1.mp3">August 26th</a>
+    <div>
+        <div class="brief-timing">00:00</div>
+        <button class="toggler"></button><button class="stopper">Stop</button>
+        <p>Sections</p>
+        <ol>
+            <li><a class="section" data-begin="0" data-end="13" href="#section01">Intro</a></li>
+            <li><a class="section" data-begin="13" data-end="777" href="#section02">Threat of National Cathedral collapse parable of religion in postmodern America</a></li>
+            <li><a class="section" data-begin="778" data-end="1128" href="#section03">Harvard prof argues no moral imperative in bioethics other than progress</a></li>
+            <li><a class="section" data-begin="1129" data-end="99999999" href="#section04">Outtro</a></li>
+        </ol>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jplayer/2.9.2/jplayer/jquery.jplayer.min.js"></script>
+<script>
+    (function (win, doc, $) {
+        var $bel = $('.briefing').first(),
+            $briefTiming = $('.brief-timing').first(),
+            $toggler = $('.toggler'),
+            $sections = $('.section'),
+            playingSection = false, currentSection = {};
+        function ready() {
+            $bel.jPlayer('setMedia', {
+                mp3: $bel.attr('href')
+            });
+            $sections.on('click', function (e) {
+                var begin = parseInt($(this).data('begin'), 10),
+                    end = parseInt($(this).data('end'), 10);
+                e.preventDefault();
+                currentSection = {begin: begin, end: end};
+                $bel.jPlayer('stop');
+                $bel.jPlayer('play', begin);
+                playingSection = true;
+            });
+            $toggler.on('click', function (e) {
+                if ($bel.hasClass('playing')) {
+                    $bel.jPlayer('pause');
+                    $(this).addClass('paused').removeClass('playing');
+                    $bel.addClass('paused').removeClass('playing');
+                } else {
+                    $bel.jPlayer('play');
+                    playingSection = false;
+                    $(this).addClass('playing').removeClass('paused');
+                    $bel.addClass('playing').removeClass('paused');
+                }
+            });
+            $('.stopper').on('click', function (e) {
+                e.preventDefault();
+                $bel.jPlayer('stop');
+                $toggler.removeClass('playing').removeClass('paused');
+                $bel.removeClass('playing').removeClass('paused');
+            });
+        }
+        function highlightSection(time) {
+            $sections.each(function (index, currentVal) {
+                var begin = parseInt(currentVal.getAttribute('data-begin'), 10),
+                    end = parseInt(currentVal.getAttribute('data-end'), 10);
+                if ((time >= begin) && (time < end)) {
+                    currentVal.classList.add('playing');
+                } else {
+                    currentVal.classList.remove('playing');
+                }
+            });
+        }
+        function ended() {
+            playingSection = false;
+        }
+        function manageTiming(e) {
+            var time = e.jPlayer.status.currentTime;
+            if (playingSection && (time >= currentSection.end)) {
+                $bel.jPlayer('pause');
+                playingSection = false;
+            }
+            $briefTiming.text($.jPlayer.convertTime(time));
+            highlightSection(time);
+        }
+        $bel.jPlayer({
+            swfPath: 'dist/jplayer',
+            solution: 'html, flash',
+            supplied: 'mp3',
+            ready: ready,
+            ended: ended,
+            timeupdate: manageTiming
+        });
+    }(window, document, jQuery));
+</script>
+</body>
+</html>

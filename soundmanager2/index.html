@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sound Manager 2 | The Briefing &mdash; Segment Testing | AlbertMohler.com</title>
+    <style>
+        .toggler::before{content:'Play';}
+        .toggler.playing::before{content:'Playing';}
+        .toggler.paused::before{content:'Paused';}
+        .toggler.loading::before{content:'Loading..';}
+        .stopper{margin-left:5px;}
+        .section{display:block;background-color:white;padding:15px;margin:5px 10px;}
+        .section.playing{background-color:goldenrod;}
+    </style>
+</head>
+<body>
+    <a class="briefing" href="http://4ff414ae5107de3a9e18-43dbab4d73aa8c295e652f2d85e793bd.r77.cf1.rackcdn.com/media/audio/totl/Podcast/20150826_TheBriefing1.mp3">August 26th</a>
+    <div>
+        <div class="brief-timing">00:00</div>
+        <button class="toggler"></button><button class="stopper">Stop</button>
+        <p>Sections</p>
+        <ol>
+            <li><a class="section" data-begin="0" data-end="13" href="#section01">Intro</a></li>
+            <li><a class="section" data-begin="13" data-end="777" href="#section02">Threat of National Cathedral collapse parable of religion in postmodern America</a></li>
+            <li><a class="section" data-begin="778" data-end="1128" href="#section03">Harvard prof argues no moral imperative in bioethics other than progress</a></li>
+            <li><a class="section" data-begin="1129" data-end="99999999" href="#section04">Outtro</a></li>
+        </ol>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/soundmanager2/2.97a.20150601/script/soundmanager2-nodebug-jsmin.js"></script>
+<script>
+    (function (win, doc) {
+        var s, // to hold the current sound
+            theBriefing = doc.querySelector('.briefing'),
+            toggler = doc.querySelector('.toggler'),
+            stopper = doc.querySelector('.stopper'),
+            briefTiming = doc.querySelector('.brief-timing'),
+            sections = Array.prototype.slice.call(doc.querySelectorAll('.section')),
+            stillLoadingButPlaying = false,
+            playingSection = false, currentSection = {};
+        function ready() {
+            var options = {};
+            options.whileplaying = manageTiming;
+            options.onfinish = finished;
+            options.whileloading = loading;
+            options.onstop = stopped;
+            options.url = theBriefing.href;
+            s = soundManager.createSound(options);
+            sections.forEach(addSection);
+            theBriefing.addEventListener('click', togglePlay);
+            toggler.addEventListener('click', togglePlay);
+            stopper.addEventListener('click', stopPlay);
+        }
+        function addSection(currentVal, index, wholeArr) {
+            currentVal.addEventListener('click', playSection.bind(currentVal));
+        }
+        function highlightSection(time) {
+            sections.forEach(function (currentVal, index, wholeArr) {
+                var begin = parseInt(currentVal.getAttribute('data-begin'), 10),
+                    end = parseInt(currentVal.getAttribute('data-end'), 10);
+                if ((time >= begin) && (time < end)) {
+                    currentVal.classList.add('playing');
+                } else {
+                    currentVal.classList.remove('playing');
+                }
+            });
+        }
+        function playSection(e) {
+            var begin = parseInt(this.getAttribute('data-begin'), 10) * 1000,
+                end = parseInt(this.getAttribute('data-end'), 10) * 1000;
+            e.preventDefault();
+            s.stop();
+            continuePlay({
+                from: begin,
+                to: end
+            });
+        }
+        function displayPart(part, displayWhenZero, append) {
+            var display = '';
+            part = parseInt(part, 10);
+            if ((part === 0) && displayWhenZero) {
+                display = '0' + part + append;
+            } else if (part > 0) {
+                if (part < 10) {
+                    display = '0' + part + append;
+                } else {
+                    display = part + append;
+                }
+            }
+            return display;
+        }
+        function manageTiming() {
+            var time = Math.floor(this.position / 1000),
+                hours = Math.floor(time / 3600),
+                minutes = Math.floor((time - (hours * 3600)) / 60),
+                seconds = Math.floor(time - (hours * 3600) - (minutes * 60));
+            briefTiming.innerHTML = displayPart(hours, false, ':') + displayPart(minutes, true, ':') + displayPart(seconds, true, '');
+            if (! stillLoadingButPlaying) {
+                toggler.classList.remove('loading');
+                stillLoadingButPlaying = true;
+            }
+            highlightSection(time);
+        }
+        function togglePlay(e) {
+            e.preventDefault();
+            if (s.playState && (!s.paused)) {
+                pausePlay();
+            } else if (s.paused) {
+                s.resume();
+            } else {
+                continuePlay();
+            }
+        }
+        function stopPlay(e) {
+            e.preventDefault();
+            s.stop();
+            briefTiming.innerHTML = '00:00';
+            highlightSection(-1);
+        }
+        function continuePlay(options) {
+            options = options || {};
+            s.play(options);
+            theBriefing.classList.remove('paused');
+            theBriefing.classList.add('playing');
+            toggler.classList.remove('paused');
+            toggler.classList.add('playing');
+            toggler.classList.remove('loading');
+        }
+        function pausePlay() {
+            s.pause();
+            theBriefing.classList.remove('playing');
+            toggler.classList.remove('playing');
+            theBriefing.classList.add('paused');
+            toggler.classList.add('paused');
+        }
+        function loading() {
+            if (! stillLoadingButPlaying) {
+                toggler.classList.add('loading');
+            }
+        }
+        function stopped() {
+            theBriefing.classList.remove('playing');
+            theBriefing.classList.remove('paused');
+            toggler.classList.remove('playing');
+            toggler.classList.remove('paused');
+        }
+        function finished() {
+            playingSection = false;
+            theBriefing.classList.remove('playing');
+            toggler.classList.remove('playing');
+            toggler.classList.remove('loading');
+            highlightSection(-1);
+        }
+        soundManager.setup({
+            swf: '/swf/',
+            onready: ready
+        });
+    }(window, document));
+</script>
+</body>
+</html>
