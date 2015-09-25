@@ -5,8 +5,25 @@
 	<title>360 Player | The Briefing &mdash; Segment Testing | AlbertMohler.com</title>
     <link rel="stylesheet" type="text/css" href="css/360player.css" />
     <style>
-        .section{display:block;background-color:white;padding:15px;margin:5px 10px;}
-        .section.playing{background-color:goldenrod;}
+        .section{
+            background-color:white;
+            padding:15px;
+            margin:5px 10px;
+            border:2px solid white;
+            background-clip:padding-box;
+        }
+        .section.playing{
+            border-color:orange;
+        }
+        .section-button{
+            padding:10px 20px;background-color:orange;
+            text-decoration:none;
+            color:white;
+            border-radius:8px;
+            background-clip:padding-box;
+        }
+        .section-button span{font-size:16px;min-width:80px;}
+        .section-button.playing span.language::after{content:'ing...';}
         .ui360 .sm2-360ui.sm2_playing .sm2-timing{visibility:hidden;}
         .ui360 .sm2-360ui.sm2_playing .sm2-360btn,
         .ui360 .sm2-360ui.sm2_playing .sm2-360btn{
@@ -16,21 +33,56 @@
             _background:transparent url(img/360-button-pause-light.gif) no-repeat 50% 50%;
             cursor:pointer;
         }
+        .ui360.ui360-vis .sm2-360ui .sm2-timing{
+            visibility:visible;
+            padding-top:36px;
+        }
+        .ui360 .sm2-360ui .sm2-timing, .ui360 .sm2-360ui .sm2-360btn:hover + .sm2-timing, .ui360 .sm2-360ui.sm2_paused .sm2-timing{
+            visibility:visible;
+        }
     </style>
     <!-- special IE-only canvas fix -->
     <!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
 </head>
 <body>
-    <div class="player ui360">
+    <div class="player ui360 ui360-vis">
         <a class="briefing" type="mp3" href="http://4ff414ae5107de3a9e18-43dbab4d73aa8c295e652f2d85e793bd.r77.cf1.rackcdn.com/media/audio/totl/Podcast/20150826_TheBriefing1.mp3">August 26th</a>
     </div>
     <div>
         <p>Sections</p>
         <ol>
-            <li><a class="section" data-begin="0" data-end="13" href="#section01">Intro</a></li>
-            <li><a class="section" data-begin="13" data-end="777" href="#section02">Threat of National Cathedral collapse parable of religion in postmodern America</a></li>
-            <li><a class="section" data-begin="778" data-end="1128" href="#section03">Harvard prof argues no moral imperative in bioethics other than progress</a></li>
-            <li><a class="section" data-begin="1129" data-end="99999999" href="#section04">Outtro</a></li>
+            <li class="section">
+                <p>Intro</p>
+                <a class="section-button" data-begin="0" data-end="13" href="#section01">
+                    <span class="image"></span>
+                    <span class="language">Play</span>
+                    <span class="timer"></span>
+                </a>
+            </li>
+            <li class="section">
+                <p>Threat of National Cathedral collapse parable of religion in postmodern America</p>
+                <a class="section-button" data-begin="13" data-end="777" href="#section02">
+                    <span class="image"></span>
+                    <span class="language">Play</span>
+                    <span class="timer"></span>
+                </a>
+            </li>
+            <li class="section">
+                <p>Harvard prof argues no moral imperative in bioethics other than progress</p>
+                <a class="section-button" data-begin="778" data-end="1128" href="#section03">
+                    <span class="image"></span>
+                    <span class="language">Play</span>
+                    <span class="timer"></span>
+                </a>
+            </li>
+            <li class="section">
+                <p>Outtro</p>
+                <a class="section-button" data-begin="1129" data-end="99999999" href="#section04">
+                    <span class="image"></span>
+                    <span class="language">Play</span>
+                    <span class="timer"></span>
+                </a>
+            </li>
         </ol>
     </div>
     <p><a target="_blank" href="http://www.schillmania.com/projects/soundmanager2/demo/360-player/">Using 360 UI for SoundManager</a></p>
@@ -56,18 +108,21 @@
             sections.forEach(addSection);
         }
         function addSection(currentVal, index, wholeArr) {
-            currentVal.addEventListener('click', playSection.bind(currentVal));
+            var btn = currentVal.querySelector('.section-button');
+            btn.addEventListener('click', playSection.bind(btn));
         }
         function playSection(e) {
             var s = threeSixtyPlayer.getSoundByURL(theBriefing.href),
                 begin = parseInt(this.getAttribute('data-begin'), 10) * 1000,
                 end = parseInt(this.getAttribute('data-end'), 10) * 1000;
             e.preventDefault();
+            playingSection = true;
             if (s) {
                 s.stop();
             } else {
                 threeSixtyPlayer.handleClick({target:theBriefing,preventDefault:function(){}});
                 s = threeSixtyPlayer.getSoundByURL(theBriefing.href);
+                s.stop();
             }
             continuePlay(s, {
                 from: begin,
@@ -80,12 +135,17 @@
         }
         function highlightSection(time) {
             sections.forEach(function (currentVal, index, wholeArr) {
-                var begin = parseInt(currentVal.getAttribute('data-begin'), 10),
-                    end = parseInt(currentVal.getAttribute('data-end'), 10);
+                var btn = currentVal.querySelector('.section-button'),
+                    begin = parseInt(btn.getAttribute('data-begin'), 10),
+                    end = parseInt(btn.getAttribute('data-end'), 10),
+                    timer = btn.querySelector('.timer');
                 if ((time >= begin) && (time < end)) {
                     currentVal.classList.add('playing');
+                    btn.classList.add('playing');
+                    timer = currentVal.querySelector('.timer').innerHTML = threeSixtyPlayer.getTime(time * 1000, true);
                 } else {
                     currentVal.classList.remove('playing');
+                    btn.classList.remove('playing');
                 }
             });
         }
