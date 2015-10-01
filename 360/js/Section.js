@@ -55,11 +55,11 @@ SBTS.am.Section.prototype.play = function (e) {
         } else {
             /* user could have clicked on a section for the first time
              * or clicked on a section that is not currently playing */
-            // TODO when a button for another section is clicked
-            //  after one was already playing, we get here and need to
-            //  add 'paused' to the one that was just playing
-            startFrom = (Math.ceil(this._lastPlayedTime) >= this._times.end) ?
-                this._times.begin : this._lastPlayedTime;
+            /* startFrom uses division (/) and Math.ceil to make up for
+             * partial sections of play */
+            startFrom = (Math.ceil(this._lastPlayedTime / 1000) >=
+                        (this._times.end / 1000)) ?
+                            this._times.begin : this._lastPlayedTime;
             this._soundInstance.stop();
             this._soundInstance.play({
                 from    : startFrom,
@@ -68,26 +68,31 @@ SBTS.am.Section.prototype.play = function (e) {
         }
     }
 };
-SBTS.am.Section.prototype.setLastPlayedTime = function (time) {
-    if (this.inSectionRange(time)) {
-        this._lastPlayedTime = time;
-    }
-};
 SBTS.am.Section.prototype.inSectionRange = function (time) {
-    return (time >= this._times.begin) && (time < this._times.end);
+    return (time > this._times.begin) && (time < this._times.end);
 };
-SBTS.am.Section.prototype.highlight = function (time) {
-    if (this.inSectionRange(time)) {
-        this.updateDisplayStatus('playing', true);
-        this.updateDisplayTime(time);
-        return true; // yes, it was highlighted
-    } else {
-        this.updateDisplayStatus('playing', false);
-        return false;
-    }
+SBTS.am.Section.prototype.updateDisplay = function (time) {
+    this.updateDisplayStatus('playing', true);
+    this.updateDisplayStatus('paused', false);
+    this.updateDisplayTime(time);
+};
+SBTS.am.Section.prototype.setLastPlayedTime = function (time) {
+    this._lastPlayedTime = time;
 };
 SBTS.am.Section.prototype.addEvents = function () {
     this.elemA.addEventListener('click', this.play.bind(this));
+};
+SBTS.am.Section.prototype.playing = function (time) {
+    if (this.inSectionRange(time)) {
+        this.setLastPlayedTime(time);
+        this.updateDisplay(time);
+        return true; // yes, it was highlighted
+    } else {
+        this.updateDisplayStatus('playing', false);
+        this.updateDisplayStatus('paused',
+            (this._lastPlayedTime !== this._times.begin));
+        return false;
+    }
 };
 SBTS.am.Section.prototype.updateDisplayStatus = function (cl, onOff) {
     this.elem.classList[onOff?'add':'remove'](cl);

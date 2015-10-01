@@ -13,26 +13,17 @@ SBTS.am.SectionGroup = function (briefingId, sectionId) {
 SBTS.am.SectionGroup.prototype.addSections = function (currentVal) {
     this.sections.push(new SBTS.am.Section(this.briefing, currentVal));
 };
-SBTS.am.SectionGroup.prototype.playing = function (pos) {
-    pos = parseInt(pos, 10);
-    this.updateTimes(pos);
-    this.highlightSection(pos);
-};
-SBTS.am.SectionGroup.prototype.updateTimes = function (time) {
-    this.sections.forEach(function (current, index, full) {
-        full[index].setLastPlayedTime(time);
-    });
-};
-SBTS.am.SectionGroup.prototype.highlightSection = function (time) {
+SBTS.am.SectionGroup.prototype.playing = function (time) {
     var me = this;
+    time = parseInt(time, 10);
     me._sectionsPlaying = false;
     me.sections.forEach(function (current, index, full) {
-        if (full[index].highlight(time)) {
+        if (full[index].playing(time)) {
             me._sectionsPlaying = true;
         }
     });
 };
 SBTS.am.SectionGroup.prototype.finished = function () {
-    this.highlightSection(-1);
+    this.playing(-1);
 };
 }(window, document));
