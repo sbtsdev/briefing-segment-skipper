@@ -1,0 +1,8 @@
+#Overview
+There are three prototypes, each at a different stage of development. The most developed is the (360 Player)[360/index.html].
+
+##360 Player
+1. Add the the seven script tags with a "src" from the (index page)[360/index.html].
+2. Add the eighth tag with its contents. You can change ".briefing" to the css identifier you want for 360 Player div wrapper (.360ui and .360ui-vis classes are still necessary). You can also change the li to any tag you want and the "section" class to any class you want as long as you specify how to identify each section with the second css identifier.
+3. Inside each section there needs to be an anchor tag with the class "section-button" and a data attribute for the begin and end times (in seconds). Those attributes will look like 'data-begin="13"' and 'data-end="16225"' (note:single quotes are only for clarity). There also needs to be a tag (any tag) inside that anchor tag with a "timer" class. That will be where the formatted time is added and updated.
+4. Also, look at the css at the top of the (index.html)[360/index.html] page. The section and anchor tag within it will always have the same "state" class(es). Either, __(1)__ they will be without any other class, meaning that section is stopped and ready to start from the beginning; __(2)__ "playing" will be added without "paused" when that section is playing; __(3)__ "playing" and "paused" will be present when the user has paused the audio but that section is the active one (i.e. no other section is playing); __(4)__ "paused" only, after it has been started (up to and including being at its end) but another section is currently playing.
