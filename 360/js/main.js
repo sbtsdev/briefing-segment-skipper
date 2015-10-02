@@ -1,56 +1,69 @@
 /* globals SBTS */
 (function (win, doc, sm) {
     'use strict';
-    /*
-     * threeSixtyPlayer augmentation variables to save original functions
-    */
-    var originalPlaying, originalFinish;
-    /*
-     * our variables
-    */
-    var sectionGroup;
+    SBTS.maker('SBTS.am.main360Sections');
+    SBTS.am.main360Sections.init = function (briefingQuery, sectionQuery) {
+        /*
+         * threeSixtyPlayer augmentation variables to save original functions
+        */
+        var originalPlaying, originalPause, originalFinish;
+        /*
+         * our variables
+        */
+        var sectionGroup, bQuery, sQuery;
 
-    /*
-     * our functions
-    */
-    function ready() {
-        sectionGroup = new SBTS.am.SectionGroup('.briefing', '.section');
-    }
-    function playing() {
-        /* jshint validthis:true */
-        sectionGroup.playing(this.position);
-        originalPlaying.apply(this);
-    }
-    function finished() {
-        /* jshint validthis:true */
-        sectionGroup.finished();
-        originalFinish.apply(this);
-    }
+        /*
+         * our functions
+        */
+        function ready() {
+            sectionGroup = new SBTS.am.SectionGroup(bQuery, sQuery);
+        }
+        function playing() {
+            /* jshint validthis:true */
+            sectionGroup.playing(this.position);
+            originalPlaying.apply(this);
+        }
+        function paused() {
+            /* jshint validthis:true */
+            sectionGroup.paused(this.position);
+            originalPause.apply(this);
+        }
+        function finished() {
+            /* jshint validthis:true */
+            sectionGroup.finished();
+            originalFinish.apply(this);
+        }
 
-    // initialize ThreeSixtyPlayer
-    win.threeSixtyPlayer = new win.ThreeSixtyPlayer();
-    /*
-     * save threeSixtyPlayer event functions
-    */
-    originalPlaying = win.threeSixtyPlayer.events.whileplaying;
-    originalFinish = win.threeSixtyPlayer.events.finish;
-    /*
-     * augment threeSixtyPlayer object
-    */
-    win.threeSixtyPlayer.events.whileplaying = playing;
-    win.threeSixtyPlayer.events.finish = finished;
+        bQuery = briefingQuery;
+        sQuery = sectionQuery;
 
-    // connect threeSixtyPlayer to soundManager along with our own ready()
-    sm.onready(function () {
-        // hook into SM2 init
-        win.threeSixtyPlayer.init();
+        // initialize ThreeSixtyPlayer
+        win.threeSixtyPlayer = new win.ThreeSixtyPlayer();
+        /*
+         * save threeSixtyPlayer event functions
+        */
+        originalPlaying = win.threeSixtyPlayer.events.whileplaying;
+        originalPause = win.threeSixtyPlayer.events.pause;
+        originalFinish = win.threeSixtyPlayer.events.finish;
+        /*
+         * augment threeSixtyPlayer object
+        */
+        win.threeSixtyPlayer.events.whileplaying = playing;
+        win.threeSixtyPlayer.events.pause = paused;
+        win.threeSixtyPlayer.events.finish = finished;
 
-        // our ready hook
-        ready();
-    });
+        // connect threeSixtyPlayer to soundManager along with our own ready()
+        sm.onready(function () {
+            // hook into SM2 init
+            win.threeSixtyPlayer.init();
 
-    // setup soundManager
-    sm.setup({
-        url: '/360/swf/'
-    });
+            // our ready hook
+            ready();
+        });
+
+        // setup soundManager
+        sm.setup({
+            url: '/360/swf/'
+        });
+    };
 }(window, document, window.soundManager));
