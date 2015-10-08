@@ -3,31 +3,34 @@
     'use strict';
 SBTS.maker('SBTS.am.Section');
 /* Create a section class to hold common stuff */
-SBTS.am.Section = function (briefing, el) {
+SBTS.am.Section = function (briefing, el, options) {
     this._soundInstance = null;
     this._times = {begin:0,end:Number.POSITIVE_INFINITY};
 
-    this.briefing = briefing;
-    this.elem = el;
-    this.elemA = el.querySelector('.section-button');
-    this.timer = this.elemA.querySelector('.timer');
+    this._options = options;
+    this._briefing = briefing;
+    this._elem = el;
+    this._elemA = el.querySelector(options.buttonQuery);
+    this._language = this._elemA.querySelector(options.languageQuery);
+    this.timer = this._elemA.querySelector(options.timerQuery);
 
     this.setTimer();
     this._lastPlayedTime = this._times.begin;
-    this.updateDisplayTime(this._times.begin);
+    this.updateDisplayTime(this._times.end);
+    this.updateLanguage(options.language.inactive);
     this.setSoundManagerInstance();
     this.addEvents();
 };
 SBTS.am.Section.prototype.setTimer = function () {
     this._times = {
-        begin:  parseInt(this.elemA.getAttribute('data-begin'), 10) * 1000,
-        end:    parseInt(this.elemA.getAttribute('data-end'), 10) * 1000
+        begin:  parseInt(this._elemA.getAttribute('data-begin'), 10) * 1000,
+        end:    parseInt(this._elemA.getAttribute('data-end'), 10) * 1000
     };
 };
 SBTS.am.Section.prototype.setSoundManagerInstance = function () {
     if (ThreeSixtyPlayer && win.threeSixtyPlayer) {
         this._soundInstance = win.threeSixtyPlayer
-            .getSoundByURL(this.briefing.href);
+            .getSoundByURL(this._briefing.href);
     }
 };
 SBTS.am.Section.prototype.play = function (e) {
@@ -37,7 +40,7 @@ SBTS.am.Section.prototype.play = function (e) {
     if (win.threeSixtyPlayer) {
         if (! sI) {
             win.threeSixtyPlayer.handleClick({
-                target:this.briefing,
+                target:this._briefing,
                 preventDefault:function(){}});
             this.setSoundManagerInstance();
             sI = this._soundInstance;
@@ -51,9 +54,11 @@ SBTS.am.Section.prototype.play = function (e) {
                 sI.resume();
                 this.updateDisplayStatus('playing', true);
                 this.updateDisplayStatus('paused', false);
+                this.updateLanguage(this._options.language.playing);
             } else {
                 sI.pause();
                 this.updateDisplayStatus('paused', true);
+                this.updateLanguage(this._options.language.activePaused);
             }
         } else {
             /* user could have clicked on a section for the first time
@@ -79,7 +84,7 @@ SBTS.am.Section.prototype.setLastPlayedTime = function (time) {
     this._lastPlayedTime = time;
 };
 SBTS.am.Section.prototype.addEvents = function () {
-    this.elemA.addEventListener('click', this.play.bind(this));
+    this._elemA.addEventListener('click', this.play.bind(this));
 };
 SBTS.am.Section.prototype.playing = function (time) {
     if (this.inSectionRange(time)) {
@@ -87,11 +92,13 @@ SBTS.am.Section.prototype.playing = function (time) {
         this.updateDisplayTime(time);
         this.updateDisplayStatus('playing', true);
         this.updateDisplayStatus('paused', false);
+        this.updateLanguage(this._options.language.playing);
         return true; // yes, it was highlighted
     } else {
         if (this._lastPlayedTime !== this._times.begin) {
             // it's only paused if it already started
             this.updateDisplayStatus('paused', true);
+            this.updateLanguage(this._options.language.inactivePaused);
         }
         this.updateDisplayStatus('playing', false);
         return false;
@@ -103,12 +110,18 @@ SBTS.am.Section.prototype.paused = function (time) {
     }
 };
 SBTS.am.Section.prototype.updateDisplayStatus = function (state, onOff) {
-    this.elem.classList[onOff?'add':'remove'](state);
-    this.elemA.classList[onOff?'add':'remove'](state);
+    var sectionState = this._options.style[state + 'Section'],
+        buttonState = this._options.style[state + 'Button'];
+    this._elem.classList[onOff?'add':'remove'](sectionState);
+    this._elemA.classList[onOff?'add':'remove'](buttonState);
+};
+SBTS.am.Section.prototype.updateLanguage = function (language) {
+    this._language.innerHTML = language;
 };
 SBTS.am.Section.prototype.updateDisplayTime = function (time) {
     if (win.threeSixtyPlayer) {
-        this.timer.innerHTML = win.threeSixtyPlayer.getTime(time, true);
+        this.timer.innerHTML = win.threeSixtyPlayer
+            .getTime(time - this._times.begin, true);
     }
 };
 }(window));
