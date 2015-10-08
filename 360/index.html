@@ -23,9 +23,9 @@
             background-clip:padding-box;
         }
         .section-button span{font-size:16px;min-width:80px;}
-        .section-button.playing span.language::after{content:'ing...';}
-        .section-button.playing.paused span.language::after,
-            .section-button.playing.paused span.language::after{content:'';}
+        /* .section-button.playing span.language::after{content:'ing...';} */
+        /* .section-button.playing.paused span.language::after, */
+        /*     .section-button.playing.paused span.language::after{content:'';} */
         .ui360 .sm2-360ui.sm2_playing .sm2-timing{visibility:hidden;}
         .ui360 .sm2-360ui.sm2_playing .sm2-360btn,
         .ui360 .sm2-360ui.sm2_playing .sm2-360btn{
@@ -79,7 +79,7 @@
             </li>
             <li class="section">
                 <p>Outtro</p>
-                <a class="section-button" data-begin="1129" data-end="99999999" href="#section04">
+                <a class="section-button" data-begin="1129" data-end="1156" href="#section04">
                     <span class="image"></span>
                     <span class="language">Play</span>
                     <span class="timer"></span>
@@ -96,7 +96,27 @@
     <script src="js/Section.js"></script>
     <script src="js/main.js"></script>
     <script>
-        if (window.SBTS){SBTS.am.main360Sections.init('.briefing','.section');}
+        if (window.SBTS){
+            SBTS.am.main360Sections.init({
+                'briefingQuery':'.briefing',
+                'sectionQuery':'.section',
+                'buttonQuery' :'.section-button',
+                'languageQuery':'.language',
+                'timerQuery' : '.timer',
+                'language':{
+                    'inactive'  : 'Play',
+                    'playing'   : 'Playing',
+                    'activePaused'  : 'Paused',
+                    'inactivePaused': 'Play'
+                },
+                'style':{
+                    'playingSection': 'playing',
+                    'playingButton': 'playing',
+                    'pausedSection': 'paused',
+                    'pausedButton': 'paused'
+                }
+            });
+        }
     </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 (function (win, doc, sm) {
     'use strict';
     SBTS.maker('SBTS.am.main360Sections');
-    SBTS.am.main360Sections.init = function (briefingQuery, sectionQuery) {
+    SBTS.am.main360Sections.init = function (customOptions) {
         /*
          * threeSixtyPlayer augmentation variables to save original functions
         */
@@ -10,13 +10,32 @@
         /*
          * our variables
         */
-        var sectionGroup, bQuery, sQuery;
+        var sectionGroup, options,
+            defaultOptions = {
+                'briefingQuery':'.briefing',
+                'sectionQuery':'.section',
+                'buttonQuery' :'.section-button',
+                'languageQuery':'.language',
+                'timerQuery' : '.timer',
+                'language':{
+                    'inactive'  : 'Play',
+                    'playing'   : 'Playing',
+                    'activePaused'  : 'Paused',
+                    'inactivePaused': 'Play'
+                },
+                'style':{
+                    'playingSection': 'playing',
+                    'playingButton': 'playing',
+                    'pausedSection': 'paused',
+                    'pausedButton': 'paused'
+                }
+            };
 
         /*
          * our functions
         */
         function ready() {
-            sectionGroup = new SBTS.am.SectionGroup(bQuery, sQuery);
+            sectionGroup = new SBTS.am.SectionGroup(options);
         }
         function playing() {
             /* jshint validthis:true */
@@ -34,8 +53,15 @@
             originalFinish.apply(this);
         }
 
-        bQuery = briefingQuery;
-        sQuery = sectionQuery;
+        // merge user and default options, smaller than a library
+        options = defaultOptions;
+        for (var op in defaultOptions) {
+            if (defaultOptions.hasOwnProperty(op)) {
+                if (customOptions.hasOwnProperty(op)) {
+                    options[op] = customOptions[op];
+                }
+            }
+        }
 
         // initialize ThreeSixtyPlayer
         win.threeSixtyPlayer = new win.ThreeSixtyPlayer();

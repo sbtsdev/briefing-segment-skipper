@@ -2,16 +2,18 @@
 (function (win, doc) {
     'use strict';
 SBTS.maker('SBTS.am.SectionGroup');
-SBTS.am.SectionGroup = function (briefingQuery, sectionQuery) {
-    this.briefing = doc.querySelector(briefingQuery);
+SBTS.am.SectionGroup = function (options) {
+    this.options = options;
+    this.briefing = doc.querySelector(options.briefingQuery);
     this.els = Array.prototype.slice.call(
-            doc.querySelectorAll(sectionQuery));
+            doc.querySelectorAll(options.sectionQuery));
     this._sectionsPlaying = false;
     this.sections = [];
     this.els.forEach(this.addSections.bind(this));
 };
 SBTS.am.SectionGroup.prototype.addSections = function (currentVal) {
-    this.sections.push(new SBTS.am.Section(this.briefing, currentVal));
+    this.sections.push(new SBTS.am.Section(this.briefing, currentVal,
+            this.options));
 };
 SBTS.am.SectionGroup.prototype.playing = function (time) {
     var me = this;
