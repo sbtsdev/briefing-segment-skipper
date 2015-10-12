@@ -1,20 +1,20 @@
 /* globals SBTS */
 (function (win, doc, sm) {
     'use strict';
-    SBTS.maker('SBTS.am.main360Sections');
-    SBTS.am.main360Sections.init = function (customOptions) {
+    SBTS.maker('SBTS.am.main360Segments');
+    SBTS.am.main360Segments.init = function (customOptions) {
         /*
          * threeSixtyPlayer augmentation variables to save original functions
         */
-        var originalPlaying, originalPause, originalFinish;
+        var originalLoading, originalPlaying, originalPause, originalFinish;
         /*
          * our variables
         */
-        var sectionGroup, options,
+        var initialPlaySegment, segmentGroup, options,
             defaultOptions = {
                 'briefingQuery':'.briefing',
-                'sectionQuery':'.section',
-                'buttonQuery' :'.section-button',
+                'segmentQuery':'.segment',
+                'buttonQuery' :'.segment-button',
                 'languageQuery':'.language',
                 'timerQuery' : '.timer',
                 'language':{
@@ -24,9 +24,11 @@
                     'inactivePaused': 'Play'
                 },
                 'style':{
-                    'playingSection': 'playing',
+                    'loadingSegment':'loading',
+                    'loadingButton':'loading',
+                    'playingSegment': 'playing',
                     'playingButton': 'playing',
-                    'pausedSection': 'paused',
+                    'pausedSegment': 'paused',
                     'pausedButton': 'paused'
                 }
             };
@@ -34,24 +36,47 @@
         /*
          * our functions
         */
+        function getSegmentPlayFromURL() {
+            var queries = window.location.search.replace('?','').
+                    replace('/','').split('&'),
+                pair, len = queries.length, i = 0;
+            for(; i < len; i += 1) {
+                pair = queries[i].split('=');
+                if ('segment' === pair[0]) {
+                    return pair[1];
+                }
+            }
+            return false;
+        }
         function ready() {
-            sectionGroup = new SBTS.am.SectionGroup(options);
+            segmentGroup = new SBTS.am.SegmentGroup(options);
+            if (initialPlaySegment) {
+                segmentGroup.playSegment(initialPlaySegment);
+            }
+        }
+        function loading() {
+            /* jshint validthis:true */
+            segmentGroup.loading(this.position);
+            originalLoading.apply(this);
         }
         function playing() {
             /* jshint validthis:true */
-            sectionGroup.playing(this.position);
+            segmentGroup.playing(this.position);
             originalPlaying.apply(this);
         }
         function paused() {
             /* jshint validthis:true */
-            sectionGroup.paused(this.position);
+            segmentGroup.paused(this.position);
             originalPause.apply(this);
         }
         function finished() {
             /* jshint validthis:true */
-            sectionGroup.finished();
+            segmentGroup.finished();
             originalFinish.apply(this);
         }
+
+        // if the link was a share link to play a specific segment then
+        initialPlaySegment = getSegmentPlayFromURL();
 
         // merge user and default options, smaller than a library
         options = defaultOptions;
@@ -68,12 +93,14 @@
         /*
          * save threeSixtyPlayer event functions
         */
+        originalLoading = win.threeSixtyPlayer.events.whileloading;
         originalPlaying = win.threeSixtyPlayer.events.whileplaying;
         originalPause = win.threeSixtyPlayer.events.pause;
         originalFinish = win.threeSixtyPlayer.events.finish;
         /*
          * augment threeSixtyPlayer object
         */
+        win.threeSixtyPlayer.events.whileloading = loading;
         win.threeSixtyPlayer.events.whileplaying = playing;
         win.threeSixtyPlayer.events.pause = paused;
         win.threeSixtyPlayer.events.finish = finished;
