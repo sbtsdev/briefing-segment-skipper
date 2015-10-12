@@ -5,27 +5,27 @@
 	<title>360 Player | The Briefing &mdash; Segment Testing | AlbertMohler.com</title>
     <link rel="stylesheet" type="text/css" href="css/360player.css" />
     <style>
-        .section{
+        .segment{
             background-color:white;
             padding:15px;
             margin:5px 10px;
             border:2px solid white;
             background-clip:padding-box;
         }
-        .section.playing{
+        .segment.playing{
             border-color:orange;
         }
-        .section-button{
+        .my-button{
             padding:10px 20px;background-color:orange;
             text-decoration:none;
             color:white;
             border-radius:8px;
             background-clip:padding-box;
         }
-        .section-button span{font-size:16px;min-width:80px;}
-        /* .section-button.playing span.language::after{content:'ing...';} */
-        /* .section-button.playing.paused span.language::after, */
-        /*     .section-button.playing.paused span.language::after{content:'';} */
+        .my-button span{font-size:16px;min-width:80px;}
+        /* .my-button.playing span.language::after{content:'ing...';} */
+        /* .my-button.playing.paused span.language::after, */
+        /*     .my-button.playing.paused span.language::after{content:'';} */
         .ui360 .sm2-360ui.sm2_playing .sm2-timing{visibility:hidden;}
         .ui360 .sm2-360ui.sm2_playing .sm2-360btn,
         .ui360 .sm2-360ui.sm2_playing .sm2-360btn{
@@ -51,39 +51,43 @@
         <a class="briefing" type="mp3" href="http://4ff414ae5107de3a9e18-43dbab4d73aa8c295e652f2d85e793bd.r77.cf1.rackcdn.com/media/audio/totl/Podcast/20150826_TheBriefing1.mp3">August 26th</a>
     </div>
     <div>
-        <p>Sections</p>
+        <p>Segments</p>
         <ol>
-            <li class="section">
+            <li class="segment">
                 <p>Intro</p>
-                <a class="section-button" data-begin="0" data-end="13" href="#section01">
+                <a class="my-button segment-button" data-begin="0" data-end="13" href="#segment1">
                     <span class="image"></span>
                     <span class="language">Play</span>
                     <span class="timer"></span>
                 </a>
+                <a href="?segment=1" style="margin-left:10px;" target="_blank" class="my-button sharer-notimportant">Share</a>
             </li>
-            <li class="section">
+            <li class="segment">
                 <p>Threat of National Cathedral collapse parable of religion in postmodern America</p>
-                <a class="section-button" data-begin="13" data-end="777" href="#section02">
+                <a class="my-button segment-button" data-begin="13" data-end="777" href="#segment2">
                     <span class="image"></span>
                     <span class="language">Play</span>
                     <span class="timer"></span>
                 </a>
+                <a href="?segment=2" style="margin-left:10px;" target="_blank" class="my-button sharer-notimportant">Share</a>
             </li>
-            <li class="section">
+            <li class="segment">
                 <p>Harvard prof argues no moral imperative in bioethics other than progress</p>
-                <a class="section-button" data-begin="778" data-end="1128" href="#section03">
+                <a class="my-button segment-button" data-begin="778" data-end="1128" href="#segment3">
                     <span class="image"></span>
                     <span class="language">Play</span>
                     <span class="timer"></span>
                 </a>
+                <a href="?segment=3" style="margin-left:10px;" target="_blank" class="my-button sharer-notimportant">Share</a>
             </li>
-            <li class="section">
+            <li class="segment">
                 <p>Outtro</p>
-                <a class="section-button" data-begin="1129" data-end="1156" href="#section04">
+                <a class="my-button segment-button" data-begin="1129" data-end="1156" href="#segment4">
                     <span class="image"></span>
                     <span class="language">Play</span>
                     <span class="timer"></span>
                 </a>
+                <a href="?segment=4" style="margin-left:10px;" target="_blank" class="my-button sharer-notimportant">Share</a>
             </li>
         </ol>
     </div>
@@ -92,15 +96,15 @@
     <script src="js/soundmanager2-nodebug-jsmin.js"></script>
     <script src="js/360player-class.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/SectionGroup.js"></script>
-    <script src="js/Section.js"></script>
+    <script src="js/SegmentGroup.js"></script>
+    <script src="js/Segment.js"></script>
     <script src="js/main.js"></script>
     <script>
         if (window.SBTS){
-            SBTS.am.main360Sections.init({
+            SBTS.am.main360Segments.init({
                 'briefingQuery':'.briefing',
-                'sectionQuery':'.section',
-                'buttonQuery' :'.section-button',
+                'segmentQuery':'.segment',
+                'buttonQuery' :'.segment-button',
                 'languageQuery':'.language',
                 'timerQuery' : '.timer',
                 'language':{
@@ -110,9 +114,11 @@
                     'inactivePaused': 'Play'
                 },
                 'style':{
-                    'playingSection': 'playing',
+                    'loadingSegment':'loading',
+                    'loadingButton':'loading',
+                    'playingSegment': 'playing',
                     'playingButton': 'playing',
-                    'pausedSection': 'paused',
+                    'pausedSegment': 'paused',
                     'pausedButton': 'paused'
                 }
             });
