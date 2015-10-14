@@ -27,11 +27,20 @@ SBTS.am.Segment.prototype.setTimer = function () {
         end:    parseInt(this._elemA.getAttribute('data-end'), 10) * 1000
     };
 };
+SBTS.am.Segment.prototype.setLastPlayedTime = function (time) {
+    this._lastPlayedTime = time;
+};
 SBTS.am.Segment.prototype.setSoundManagerInstance = function () {
     if (ThreeSixtyPlayer && win.threeSixtyPlayer) {
         this._soundInstance = win.threeSixtyPlayer
             .getSoundByURL(this._briefing.href);
     }
+};
+SBTS.am.Segment.prototype.addEvents = function () {
+    this._elemA.addEventListener('click', this.play.bind(this));
+};
+SBTS.am.Segment.prototype.inSegmentRange = function (time) {
+    return (time >= this._times.begin) && (time < this._times.end);
 };
 SBTS.am.Segment.prototype.play = function (e) {
     var sI = this._soundInstance,
@@ -68,6 +77,7 @@ SBTS.am.Segment.prototype.play = function (e) {
             /* startFrom uses division (/) and Math.ceil to make up for
              * partial play seconds (e.g. stopping at 122998 because playing
              * more of the sound would put it past the end time of 13 sec.) */
+            this.updateDisplayStatus('playing', true);
             this.updateDisplayStatus('loading', true);
             startFrom = (Math.ceil(this._lastPlayedTime / 1000) >=
                         (this._times.end / 1000)) ?
@@ -80,14 +90,14 @@ SBTS.am.Segment.prototype.play = function (e) {
         }
     }
 };
-SBTS.am.Segment.prototype.inSegmentRange = function (time) {
-    return (time > this._times.begin) && (time < this._times.end);
-};
-SBTS.am.Segment.prototype.setLastPlayedTime = function (time) {
-    this._lastPlayedTime = time;
-};
-SBTS.am.Segment.prototype.addEvents = function () {
-    this._elemA.addEventListener('click', this.play.bind(this));
+SBTS.am.Segment.prototype.bufferStateChanged = function (time, onOff) {
+    if (this.inSegmentRange(time)) {
+        if (onOff) {
+            this.updateDisplayStatus('loading', true);
+        } else {
+            this.updateDisplayStatus('loading', false);
+        }
+    }
 };
 SBTS.am.Segment.prototype.playing = function (time) {
     if (this.inSegmentRange(time)) {
@@ -112,6 +122,16 @@ SBTS.am.Segment.prototype.playing = function (time) {
 SBTS.am.Segment.prototype.paused = function (time) {
     if (this.inSegmentRange(time)) {
         this.updateDisplayStatus('paused', true);
+        this.updateLanguage(this._options.language.activePaused);
+    }
+};
+SBTS.am.Segment.prototype.stopped = function (time) {
+    time -= 125; // take an eighth of a second off because of timer limits
+    if (this.inSegmentRange(time)) {
+        this.updateDisplayStatus('paused', false);
+        this.updateDisplayStatus('playing', false);
+        this.updateDisplayStatus('loading', false);
+        this.updateLanguage(this._options.language.inactive);
     }
 };
 SBTS.am.Segment.prototype.updateDisplayStatus = function (state, onOff) {
