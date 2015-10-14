@@ -21,6 +21,13 @@ SBTS.am.SegmentGroup.prototype.playSegment = function (segment) {
         this.segments[segment].play.call(this.segments[segment]);
     }
 };
+SBTS.am.SegmentGroup.prototype.bufferStateChanged = function (time) {
+    var me = this;
+    time = parseInt(time, 10);
+    me.segments.forEach(function (current, index, full) {
+        full[index].bufferStateChanged(time);
+    });
+};
 SBTS.am.SegmentGroup.prototype.playing = function (time) {
     var me = this;
     time = parseInt(time, 10);
@@ -37,6 +44,14 @@ SBTS.am.SegmentGroup.prototype.paused = function (time) {
     me._segmentsPlaying = false;
     me.segments.forEach(function (current, index, full) {
         full[index].paused(time);
+    });
+};
+SBTS.am.SegmentGroup.prototype.stopped = function (time) {
+    var me = this;
+    time = parseInt(time, 10);
+    me._segmentsPlaying = false;
+    me.segments.forEach(function (current, index, full) {
+        full[index].stopped(time);
     });
 };
 SBTS.am.SegmentGroup.prototype.finished = function () {

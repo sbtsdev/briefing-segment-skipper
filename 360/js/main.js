@@ -6,7 +6,8 @@
         /*
          * threeSixtyPlayer augmentation variables to save original functions
         */
-        var originalPlaying, originalPause, originalFinish;
+        var originalBufferChange, originalPlaying,
+            originalPause, originalStop, originalFinish;
         /*
          * our variables
         */
@@ -54,6 +55,11 @@
                 segmentGroup.playSegment(initialPlaySegment);
             }
         }
+        function bufferStateChanged() {
+            /* jshint validthis:true */
+            segmentGroup.bufferStateChanged(this.position, this.isBuffering);
+            originalBufferChange.apply(this);
+        }
         function playing() {
             /* jshint validthis:true */
             segmentGroup.playing(this.position);
@@ -63,6 +69,11 @@
             /* jshint validthis:true */
             segmentGroup.paused(this.position);
             originalPause.apply(this);
+        }
+        function stopped() {
+            /* jshint validthis:true */
+            segmentGroup.stopped(this.position);
+            originalStop.apply(this);
         }
         function finished() {
             /* jshint validthis:true */
@@ -88,14 +99,18 @@
         /*
          * save threeSixtyPlayer event functions
         */
+        originalBufferChange = win.threeSixtyPlayer.events.bufferchange;
         originalPlaying = win.threeSixtyPlayer.events.whileplaying;
         originalPause = win.threeSixtyPlayer.events.pause;
+        originalStop = win.threeSixtyPlayer.events.stop;
         originalFinish = win.threeSixtyPlayer.events.finish;
         /*
          * augment threeSixtyPlayer object
         */
+        win.threeSixtyPlayer.events.bufferchange = bufferStateChanged;
         win.threeSixtyPlayer.events.whileplaying = playing;
         win.threeSixtyPlayer.events.pause = paused;
+        win.threeSixtyPlayer.events.stop = stopped;
         win.threeSixtyPlayer.events.finish = finished;
 
         // connect threeSixtyPlayer to soundManager along with our own ready()
