@@ -54,11 +54,6 @@
                 segmentGroup.playSegment(initialPlaySegment);
             }
         }
-        function loading() {
-            /* jshint validthis:true */
-            segmentGroup.loading(this.position);
-            originalLoading.apply(this);
-        }
         function playing() {
             /* jshint validthis:true */
             segmentGroup.playing(this.position);
