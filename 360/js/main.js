@@ -85,6 +85,7 @@
         initialPlaySegment = getSegmentPlayFromURL();
 
         // merge user and default options, smaller than a library
+        customOptions = customOptions || {};
         options = defaultOptions;
         for (var op in defaultOptions) {
             if (defaultOptions.hasOwnProperty(op)) {
