@@ -6,7 +6,7 @@
         /*
          * threeSixtyPlayer augmentation variables to save original functions
         */
-        var originalLoading, originalPlaying, originalPause, originalFinish;
+        var originalPlaying, originalPause, originalFinish;
         /*
          * our variables
         */
@@ -88,14 +88,12 @@
         /*
          * save threeSixtyPlayer event functions
         */
-        originalLoading = win.threeSixtyPlayer.events.whileloading;
         originalPlaying = win.threeSixtyPlayer.events.whileplaying;
         originalPause = win.threeSixtyPlayer.events.pause;
         originalFinish = win.threeSixtyPlayer.events.finish;
         /*
          * augment threeSixtyPlayer object
         */
-        win.threeSixtyPlayer.events.whileloading = loading;
         win.threeSixtyPlayer.events.whileplaying = playing;
         win.threeSixtyPlayer.events.pause = paused;
         win.threeSixtyPlayer.events.finish = finished;
